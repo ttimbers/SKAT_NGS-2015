@@ -7,27 +7,27 @@ output: html_document
 
 ## Introduction to GWAS
 A genome-wide association study (GWAS) is a method which tests whether genetic variants are associated with a trait (*e.g.,* phenotype or
-disease outcome). The method compares the DNA sequences of two groups: individuals with the diesease phenotype or disease outcome (cases)
-and individuals without the diesease phenotype or disease outcome (controls). Individuals DNA is read via SNP arrays or sequencing and
+disease outcome). The method compares the DNA sequences of two groups: individuals with the phenotype or disease outcome (cases)
+and individuals without the phenotype or disease outcome (controls). Individuals DNA is read via SNP arrays or sequencing and
 if one variant appears significantly more frequently in the pool of individuals with the disease then the variant is said to be 
 "associated" with the disease. 
 
 ## New considerations when performing GWAS on sequecing data
 GWAS was developed for data from SNP microarrays and has begun to be subsequently adapted for next-generation sequencing data. Thus there
 are several considerations when doing GWAS with sequencing data, including:
-* how to deal with rare variants (these didn't exist in SNP array experiments)
+* how to deal with rare variants (these didn't exist in SNP array experiments)?
 * focus only on the exome? or look at whole-genome?
 
 ## Advantages when performing GWAS on sequecing data
-* potentially increased power due to rare variants potentially bein 
+* potentially increased power due to rare variants potentially being more sever than common variants 
 * sequencing gives a complete picture of genetic variation (*e.g.,* SNPs, Copy Number Variants (CNVs) and insertions-deletions)
 * can predict severity of variants from sequencing data and use this to weight analysis
 
-## Outline of project workflow
+## Outline of project workflow for GWAS of sequencing data using the Sequence Kernel Association Test (SKAT)
 1. Create a single `.vcf` file containing all the variants (as rows) and all the individuals (as columns)
-2. Choose perform association analysis via either gene sets or windows (*e.g.* SNP/variant set is defined to be those 
+2. Choose to perform association analysis via either gene sets or windows (*e.g.* SNP/variant set is defined to be those 
 variants which fall within a chosen region size).
-3. (optional) Create a SNP set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene)
+3. Create a SNP set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene)
 4. (optional) Create a custom weights file to assign weights to each variant
 5. Create binary `plink` files from the .vcf file
 6. Append the phenotype/disease outcome to the `plink` `.fam` file
@@ -75,9 +75,9 @@ grep -v -E '##' MMP_vcf-merge.vcf | cut -f 10-15 | head -5
 ```
 
 When we merged the files, we see that for each individual we either have "1/1" or "." for a genotype. vcf-merge assumed
-that if there was no variant info for an individual, when it merged the file it assumed that the data was missing. In
-the case of this data, it is not, each individual .vcf files simply did not contain all variants for this whole dataset
-because each file would be ~ 860,000 lines long filled with mostly "0/0". But we need those "0/0" and so we need to replace 
+that if there was no variant info for an individual when it merged the file that the data was missing. In
+the case of this data this is not true. For this dataset, each individual .vcf files simply did not contain all variants for this whole dataset
+because each file would be ~ 860,000 lines long and filled with mostly "0/0". But we need those "0/0" for our analysis and so we need to replace 
 the "." with "0/0". We can use the gsub function in awk to do this. 
 ```{r engine='bash'}
 # replace  "." with "0/0""
@@ -134,7 +134,7 @@ write.table(x = SSID, file = "data/MMP.SSID", row.names = FALSE, col.names = FAL
 
 ### Create binary `plink` files from the .vcf file
 
-`plink` (**reference**) is one of the most widely used programs to perform traditional GWAS (*e.g.,* using SNP array data) 
+`plink` (Purcell *et al., American Journal of Human Genetics*, 2007) is one of the most widely used programs to perform traditional GWAS (*e.g.,* using SNP array data) 
 and thus most newly developed tools accept `plink` files as input. In addition to association analysis tools, `plink` now
 also contains tools to convert `.vcf` files to `plink` files.
 ```{r engine='bash'}
@@ -237,9 +237,12 @@ All_SKAT_Data$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
 head(All_SKAT_Data$results[order(All_SKAT_Data$results$Q.value),])
+
+#save SKAT results
+write.table(file = All_SKAT_Data$results, row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
-We find that if we choose a 30% false-discovery rate cut-off that we find several hundred genes significantly associated with
+We find that if we choose a 30% false-discovery rate cut-off that we find that a lot of genes are significantly associated with
 the phenotype. This doesn't make much sense? This is due to a skewed p-value distrubution from these samples which arises from 
 the distribution of minor allele counts in the Million Mutation project strains which exponentially decreases from 1 to N.
 ```{r}
@@ -321,9 +324,12 @@ All_SKAT_Data_reduced$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
 head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$Q.value),])
+
+#save results
+write.table(file = All_SKAT_Data_reduced$results, row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
-Now we can see that only 4 genes are associated with the phenotype - a much more reasonable number. So
+Now we can see that only a handful of genes are associated with the phenotype - a much more reasonable number. So
 what's next? The gold standard in human studies would to be to perform an independent data collection and 
 analysis on another sample of the population and if any genes show up as signficant in both sets of analyses
 then we would have a fair anount confidence that their disruption may cause the phenotpye/disease outcome.
@@ -336,6 +342,7 @@ and/or mapping experiments.
 
 **References:**
 1. Kumar P, Henikoff S, Ng PC. 2009. Predicting the effects of coding non-synonymous variants on protein function using the SIFT algorithm. Nat Protoc 4: 1073-1081.
+2. Purcell S, Neale B, Todd-Brown K, Thomas L, Ferreira MAR, Bender D, Maller J, Sklar P, de Bakker PIW, Daly MJ & Sham PC (2007) PLINK: a toolset for whole-genome association and population-based linkage analysis. American Journal of Human Genetics, 81.
 2. Ramensky V, Bork P, Sunyaev S. 2002. Human non-synonymous SNPs: server and survey. Nucleic Acids Res 30: 3894-3900.
 3. Thompson O, Edgley M, Strasbourger P, Flibotte S, Ewing B, Adair R, Au V, Chaudry I, Fernando L, Hutter H et al. 2013. The Million Mutation Project: A new approach to genetics in Caenorhabditis elegans. Genome Res doi:gr.157651.113 [pii] 10.1101/gr.157651.113.
 4. Wu MC, Lee S, Cai T, Li Y, Boehnke M, Lin X. 2011. Rare-variant association testing for sequencing data with the sequence kernel association test. American journal of human genetics 89: 82-93.
