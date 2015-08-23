@@ -40,42 +40,35 @@ individual for this analysis.
 ls data/*.vcf | head -5
 ```
 
-We need to first compress all the `.vcf` files. We will do this in the Shell using `gzip`.
-```{r engine='bash'}
-# Bash Shell
-gzip data/*.vcf
-ls data/*.vcf* | head -5
-```
-
 Next, we use the VCFtools program `vcf-merge` to create a single merged `.vcf` file containing all the variants and all 
 the individuals.
 ```{r engine='bash'}
 # Bash Shell
+# pre-process .vcf files so they are compatible with vcf-merge
+for file in *.vcf; do bgzip -c $file > $file.gz; tabix -p vcf $file.gz; done
+ls data/*.vcf.gz | head -5
 
-# had to run Stephane's perl script on each strain individually to get format and individual genotype columns
-
-# pre-process .vcf files (maybe write a for loop?)
-bgzip -c VC10118.vcf > VC10118.vcf.gz
-tabix -p vcf VC10118.vcf.gz
-bgzip -c VC20138.vcf > VC20138.vcf.gz
-tabix -p vcf VC20138.vcf.gz
-
-#not sure if this works, but someone said it did
-#file=$1 
-#bgzip >$file
-#tabix -f -p vcf $file
-
-# merge them together
-# vcf-merge data/*.vcf.gz | bgzip -c > data/MMP.vcf.gz does not work
-vcf-merge VC10118.vcf.gz VC20138.vcf.gz | bgzip -c > test_merge.vcf.gz # works but you get "."" instead of "0/0"" so have to replace them...
-ls data/MMP.vcf*
+# merge them together (note - if you run this twice you will get an error message because it will try to merge MMP_vcf-merge.vcf.gz)
+vcf-merge data/*.vcf.gz | bgzip -c > MMP_vcf-merge.vcf.gz 
+ls MMP_vcf-merge.vcf.gz
 ```
 
 Then we uncompress `MMP.vcf.gz` so we can use it to create a snp set ID (`SSID`) file, as well as binary `plink` files.
 ```{r engine='bash'}
 # Bash Shell
-gunzip data/MMP.vcf.gz
-ls data/MMP.vcf*
+gunzip data/MMP_vcf-merge.vcf.gz
+grep -v -E '##' MMP_vcf-merge.vcf | cut -f 10-15 | head -5
+```
+
+When we merged the files, we see that for each individual we either have "1/1" or "." for a genotype. vcf-merge assumed
+that if there was no variant info for an individual, when it merged the file it assumed that the data was missing. In
+the case of this data, it is not, each individual .vcf files simply did not contain all variants for this whole dataset
+because each file would be ~ 860,000 lines long filled with mostly "0/0". But we need those "0/0" and so we need to replace 
+the "." with "0/0". We can use the gsub function in awk to do this. 
+```{r engine='bash'}
+# replace  "." with "0/0""
+awk '{gsub("\t[.]","\t0/0",$0); print;}' MMP_vcf-merge.vcf > MMP.vcf
+grep -v -E '##' MMP.vcf | cut -f 10-15 | head -5
 ```
 
 ### Create a SNP set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene)
@@ -325,6 +318,7 @@ then we would have a fair anount confidence that their disruption may cause the 
 In genetically manipuable model organisms you could instead experimentally confirm that mutations in these 
 genes are causative for the phenotpye/disease outcome via Crispr/Casp, genetic rescue, RNAi 
 and/or mapping experiments.
+
 
 **References:**
 1. Kumar P, Henikoff S, Ng PC. 2009. Predicting the effects of coding non-synonymous variants on protein function using the SIFT algorithm. Nat Protoc 4: 1073-1081.
