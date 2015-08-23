@@ -6,8 +6,22 @@ output: html_document
 ---
 
 ## Introduction to GWAS
+A genome-wide association study (GWAS) is a method which tests whether genetic variants are associated with a trait (*e.g.,* phenotype or
+disease outcome). The method compares the DNA sequences of two groups: individuals with the diesease phenotype or disease outcome (cases)
+and individuals without the diesease phenotype or disease outcome (controls). Individuals DNA is read via SNP arrays or sequencing and
+if one variant appears significantly more frequently in the pool of individuals with the disease then the variant is said to be 
+"associated" with the disease. 
 
-## New considerations when perforiming GWAS on sequecing data
+## New considerations when performing GWAS on sequecing data
+GWAS was developed for data from SNP microarrays and has begun to be subsequently adapted for next-generation sequencing data. Thus there
+are several considerations when doing GWAS with sequencing data, including:
+* how to deal with rare variants (these didn't exist in SNP array experiments)
+* focus only on the exome? or look at whole-genome?
+
+## Advantages when performing GWAS on sequecing data
+* potentially increased power due to rare variants potentially bein 
+* sequencing gives a complete picture of genetic variation (*e.g.,* SNPs, Copy Number Variants (CNVs) and insertions-deletions)
+* can predict severity of variants from sequencing data and use this to weight analysis
 
 ## Outline of project workflow
 1. Create a single `.vcf` file containing all the variants (as rows) and all the individuals (as columns)
