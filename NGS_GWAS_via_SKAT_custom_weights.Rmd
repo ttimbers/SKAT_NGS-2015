@@ -1,0 +1,39 @@
+---
+title: "SKAT with custom weights"
+author: "Tiffany Timbers"
+date: "August 22, 2015"
+output: html_document
+---
+
+## Optional add-on - apply custom weights to variants
+
+### Create a custom weights file to assign weights to each variant
+
+With SKAT we can choose to weight all variants equally, or give higher weights to rare variants as opposed to common 
+variants, but we can also use custom variants, taking advantage *a priori* information about the type/severity of
+mutation. For example, we would expect knockout mutations (*e.g.* nonsense, frameshifitng indels and splicing mutations)
+to result in a more severe phenotype/disease outcome compared to a inframe deletion or missense mutation. These weights
+can be chosen by the user, or they can be calculated using available tools such as SIFT (Kumar *et al., Nature Protocols*, 
+2009) or Polyphen (Ramensky *et al., Nucleic Acids Research*, 2002).
+```{r}
+# R
+# use reduced_SSID to get only the rows from gene_variants we will be performing SKAT on
+head(reduced_SSID)
+head(gene_variants)
+
+# give gene_variants better column names
+colnames(gene_variants) <- c("CHR", "POS", "variant", "REF", "ALT", "QUAL", "FILTER", "INFO")
+reduced_gene_variants <- semi_join(gene_variants, reduced_SSID)
+dim(gene_variants)
+dim(reduced_gene_variants)
+
+# get SIFT weigths from Mike or provide my file
+```
+
+### Apply SKAT and mutliple testing correction
+```{r}
+# R
+## some r code to do this
+```
+
+
