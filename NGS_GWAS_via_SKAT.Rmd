@@ -12,13 +12,13 @@ and individuals without the phenotype or disease outcome (controls). Individuals
 if one variant appears significantly more frequently in the pool of individuals with the disease then the variant is said to be 
 "associated" with the disease. 
 
-## New considerations when performing GWAS on sequecing data
+## New considerations when performing GWAS on sequencing data
 GWAS was developed for data from SNP microarrays and has begun to be subsequently adapted for next-generation sequencing data. Thus there
 are several considerations when doing GWAS with sequencing data, including:
 * how to deal with rare variants (these didn't exist in SNP array experiments)?
 * focus only on the exome? or look at whole-genome?
 
-## Advantages when performing GWAS on sequecing data
+## Advantages when performing GWAS on sequencing data
 * potentially increased power due to rare variants potentially being more sever than common variants 
 * sequencing gives a complete picture of genetic variation (*e.g.,* SNPs, Copy Number Variants (CNVs) and insertions-deletions)
 * can predict severity of variants from sequencing data and use this to weight analysis
