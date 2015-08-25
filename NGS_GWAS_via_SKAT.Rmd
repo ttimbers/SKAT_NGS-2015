@@ -57,7 +57,7 @@ ls data/*.vcf | head -5
 
 Next, we use the VCFtools program `vcf-merge` to create a single merged `.vcf` file containing all the variants and all 
 the individuals.
-```{r engine='bash'}
+```{r engine='bash', results='hide'}
 # Bash Shell
 ## CAUTION: LONG-RUN TIME PROCESS
 
@@ -107,7 +107,7 @@ we are using here, gene/sequence names are found either after `SN=` or `CODING=`
 ```{r engine='bash'}
 # Bash Shell
 
-grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | grep -E -v 'GRANT=0' | cut -f 1-8 > data/gene_variants.txt
+grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | grep -E -v 'GRANT=0|GRANT=NA' | cut -f 1-8 > data/gene_variants.txt
 head -5 data/gene_variants.txt
 ```
 
@@ -145,7 +145,7 @@ write.table(x = SSID, file = "data/MMP.SSID", row.names = FALSE, col.names = FAL
 `plink` (Purcell *et al., American Journal of Human Genetics*, 2007) is one of the most widely used programs to perform traditional GWAS (*e.g.,* using SNP array data) 
 and thus most newly developed tools accept `plink` files as input. In addition to association analysis tools, `plink` now
 also contains tools to convert `.vcf` files to `plink` files.
-```{r engine='bash'}
+```{r engine='bash', results='hide'}
 # Bash Shell
 
 plink --vcf data/MMP.vcf --allow-extra-chr --no-fid --no-parents --no-sex --no-pheno --out data/MMP
@@ -275,8 +275,7 @@ SSID <- read.table(file = "data/MMP.SSID", stringsAsFactors = FALSE)
 MACs <- count(SSID[,1])
 
 # plot this as a histogram
-MAC_hist <- hist(x <- MACs[,2])
-plot(MAC_hist$counts, xlab = "Minor Allele Count", ylab = "Number of Genes")
+MAC_hist <- hist(x <- (MACs[MACs$freq < 50,2]), breaks = 50, xlab = "Minor Allele Count", ylab = "Number of Genes", main = "Allele distribution")
 ```
 
 Thus, to use false-discovery rate we need to decide on a minimum minor allele count for SNP sets we want 
