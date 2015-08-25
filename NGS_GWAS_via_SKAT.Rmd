@@ -214,7 +214,8 @@ set.seed(100)
 Null_Model <- SKAT_Null_Model(fam_file$V6 ~ 1, out_type="D")
 
 # perform SKAT on all sets of variants
-All_SKAT_Data  <- SKAT.SSD.All(SSD.info, Null_Model) 
+#All_SKAT_Data  <- SKAT.SSD.All(SSD.info, Null_Model) 
+All_SKAT_Data  <- SKAT.SSD.All(SSD.INFO = SSD.info, obj = Null_Model) 
 ```
 
 SKAT.SSD.All returns a dataframe that contains `SetID`, p-values (`P.value`), the number of markers in the SNP sets 
@@ -234,6 +235,9 @@ phenotype/disease outcome we must sort the results by p-value.
 
 # sort SKAT results by p-value
 head(All_SKAT_Data$results[order(All_SKAT_Data$results$P.value),])
+
+#save SKAT results
+write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-pvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 ### Apply mutliple testing correction
@@ -248,15 +252,15 @@ a "medium" stringency multiple correction adjustment, the false discovery rate.
 library(fdrtool)
 
 # calculate q-values
-qvals <- fdrtool(All_SKAT_Data$results$P.value, statistic = "pvalue", cutoff.method="fndr")
+qvals <- fdrtool(All_SKAT_Data$results$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
 All_SKAT_Data$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-All_SKAT_Data$results <-All_SKAT_Data$results[order(All_SKAT_Data$results$Q.value),]
+All_SKAT_Data$results <-All_SKAT_Data$results[order(All_SKAT_Data$results$P.value),]
 All_SKAT_Data$results[1:20,]
 
 #save SKAT results
-write.table(x = All_SKAT_Data$results, file = "data/SKAT_all.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-qvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 We find that if we choose a 30% false-discovery rate cut-off that we find that a lot of genes are significantly associated with
@@ -303,7 +307,7 @@ SSID_count <- count(SSID[,1])
 head(SSID_count)
   
 # make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 6 variants)
-genes_to_include <- data.frame(SSID_count[SSID_count$freq >= 7, 1])
+genes_to_include <- data.frame(SSID_count[SSID_count$freq >= 5, 1])
 
 # give the data frame meaningful column names  
 colnames(genes_to_include) <- ("gene")
@@ -333,17 +337,17 @@ SSD.info_reduced <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # null model doesn't take in info from .SSID, so we don't need to run that again
 # perform SKAT on all sets of variants
-All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.info_reduced, Null_Model) 
+All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.INFO = SSD.info_reduced, obj = Null_Model)
 
 # sort SKAT results by p-value
 head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),])
 
 # calculate q-values
-qvals <- fdrtool(All_SKAT_Data_reduced$results$P.value, statistic = "pvalue", cutoff.method="fndr")
+qvals <- fdrtool(All_SKAT_Data_reduced$results$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
 All_SKAT_Data_reduced$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-All_SKAT_Data_reduced$results <- All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$Q.value),]
+All_SKAT_Data_reduced$results <- All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),]
 All_SKAT_Data_reduced$results[1:20,]
 
 #save SKAT results
