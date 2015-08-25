@@ -17,6 +17,7 @@ GWAS was developed for data from SNP microarrays and has begun to be subsequentl
 are several considerations when doing GWAS with sequencing data, including:
 * how to deal with rare variants (these didn't exist in SNP array experiments)?
 * focus only on the exome? or look at whole-genome?
+* how to deal with synonomous mutations?
 
 ## Advantages when performing GWAS on sequencing data
 * potentially increased power due to rare variants potentially being more sever than common variants 
@@ -94,11 +95,11 @@ grep -v -E '##' data/MMP.vcf | cut -f 10-15 | head -5
 ### Create a SNP set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene)
 
 For this analysis, we will define our SNP/variant sets by genes, thus we will omit all other DNA outside of exons and 
-introns from our analysis. To do this we need to create a snp set ID (`.SSID`) file which indicates which variants 
-belong to which set (*e.g.,* gene). `SSID` files contain 2 columns, the first being the gene name and the second being
-the variant name. Note - you can define these SNP sets however you want for your own analysis. For example, you could
-define them by biochemical pathways as opposed to genes to potentially increase power.
-
+introns from our analysis. We also want to omit silent mutations in coding regions To do this we need to create a snp 
+set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene). `SSID` files contain 2 columns, 
+the first being the gene name and the second being the variant name. Note - you can define these SNP sets however you 
+want for your own analysis. For example, you could define them by biochemical pathways as opposed to genes to potentially 
+increase power.
 
 First we extract all the lines from the `.vcf` file with gene names using a series of `grep` commands. Note - these 
 commands depend on how you defined your gene/sequence names in the`INFO` column. In the case of the `.vcf` files
@@ -106,7 +107,7 @@ we are using here, gene/sequence names are found either after `SN=` or `CODING=`
 ```{r engine='bash'}
 # Bash Shell
 
-grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | cut -f 1-8 > data/gene_variants.txt
+grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | grep -E -v 'GRANT=0' | cut -f 1-8 > data/gene_variants.txt
 head -5 data/gene_variants.txt
 ```
 
@@ -251,10 +252,11 @@ qvals <- fdrtool(All_SKAT_Data$results$P.value, statistic = "pvalue", cutoff.met
 All_SKAT_Data$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-head(All_SKAT_Data$results[order(All_SKAT_Data$results$Q.value),])
+All_SKAT_Data$results <-All_SKAT_Data$results[order(All_SKAT_Data$results$Q.value),]
+All_SKAT_Data$results[1:20,]
 
 #save SKAT results
-write.table(file = All_SKAT_Data$results, row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+write.table(x = All_SKAT_Data$results, file = "data/SKAT_all.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 We find that if we choose a 30% false-discovery rate cut-off that we find that a lot of genes are significantly associated with
@@ -301,7 +303,7 @@ head(SSID)
 SSID_count <- count(SSID[,1])
 head(SSID_count)
   
-# make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 7 variants)
+# make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 6 variants)
 genes_to_include <- data.frame(SSID_count[SSID_count$freq >= 7, 1])
 
 # give the data frame meaningful column names  
@@ -319,6 +321,7 @@ write.table(x = reduced_SSID, file = "data/MMP-reduced.SSID", row.names = FALSE,
 Now can run SKAT with this reduced SNP set ID (`.SSID`) file:
 ```{r}
 # R
+## CAUTION: LONG-RUN TIME PROCESS
 
 # load SKAT library (to do association analysis)
 library(SKAT)
@@ -327,11 +330,11 @@ library(SKAT)
 Generate_SSD_SetID('data/MMP.bed', 'data/MMP.bim', 'data/MMP.fam', 'data/MMP-reduced.SSID', 'data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # open .SSD and .info files we just created
-SSD.info <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
+SSD.info_reduced <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # null model doesn't take in info from .SSID, so we don't need to run that again
 # perform SKAT on all sets of variants
-All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.info, Null_Model_reduced) 
+All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.info_reduced, Null_Model) 
 
 # sort SKAT results by p-value
 head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),])
@@ -341,10 +344,11 @@ qvals <- fdrtool(All_SKAT_Data_reduced$results$P.value, statistic = "pvalue", cu
 All_SKAT_Data_reduced$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$Q.value),])
+All_SKAT_Data_reduced$results <- All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$Q.value),]
+All_SKAT_Data_reduced$results[1:20,]
 
-#save results
-write.table(file = All_SKAT_Data_reduced$results, row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+#save SKAT results
+write.table(x = All_SKAT_Data_reduced$results, file = "data/SKAT_all_reduced.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 Now we can see that only a handful of genes are associated with the phenotype - a much more reasonable number. So
@@ -353,7 +357,7 @@ analysis on another sample of the population and if any genes show up as signfic
 then we would have a fair anount confidence that their disruption may cause the phenotpye/disease outcome.
 
 
-In genetically manipuable model organisms you could instead experimentally confirm that mutations in these 
+In genetically manipuable organisms you could instead experimentally confirm that mutations in these 
 genes are causative for the phenotpye/disease outcome via Crispr/Casp, genetic rescue, RNAi 
 and/or mapping experiments.
 
