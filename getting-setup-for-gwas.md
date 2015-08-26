@@ -4,6 +4,11 @@ sudo apt-get update
 sudo apt-get install -y r-base zlib1g-dev vcftools putty-tools plink
 ```
 
+```
+### Get data
+curl -L https://github.com/ttimbers/SKAT_NGS-2015/blob/master/data.zip?raw=true > data.zip
+```
+
 ### Install packages
 ```
 wget https://cran.r-project.org/src/contrib/Archive/plyr/plyr_1.7.tar.gz
@@ -16,3 +21,4 @@ install.packages("stringr", dependencies = TRUE)
 install.packages("SKAT", dependencies = TRUE)
 install.packages("fdrtool", dependencies = TRUE)
 ```
+
