@@ -210,7 +210,7 @@ SSD.info <- Open_SSD('data/MMP.SSD', 'MMP.info')
 
 # create null model based on phenotypes (and co-variates if you have any)
 set.seed(100)
-Null_Model <- SKAT_Null_Model(fam_file$V6 ~ 1, out_type="D")
+Null_Model <- SKAT_Null_Model(formula = fam_file$V6 ~ 1, out_type="D")
 
 # perform SKAT on all sets of variants (we wont run this because it takes too long)
 #All_SKAT_Data  <- SKAT.SSD.All(SSD.INFO = SSD.info, obj = Null_Model) 
