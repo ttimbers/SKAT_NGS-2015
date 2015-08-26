@@ -281,8 +281,20 @@ SSID <- read.table(file = "data/MMP.SSID", stringsAsFactors = FALSE)
 MACs <- count(SSID[,1])
 
 # plot this as a histogram
+pdf("MAC_hist.pdf")
 MAC_hist <- hist(x <- (MACs[MACs$freq < 50,2]), breaks = 50, xlab = "Minor Allele Count", ylab = "Number of Genes", main = "Allele distribution")
+dev.off()
 ```
+
+View the file on your local machine by opening a terminal and typing:
+```
+# Bash Shell
+
+cd Desktop
+# scp -i <Path_to_your_key_pair_file> ubuntu@<your_ec2_number>:/home/ubuntu/MAC_hist.pdf .
+```
+Next open the .pdf on your desktop from Finder/Explorer.
+
 
 Thus, to use false-discovery rate we need to decide on a minimum minor allele count for SNP sets we want 
 to include our analysis. This is important beyond correctiong for multiple comparisons, for example, how
