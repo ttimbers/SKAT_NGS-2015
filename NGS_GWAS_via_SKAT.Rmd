@@ -148,7 +148,7 @@ also contains tools to convert `.vcf` files to `plink` files.
 ```{r engine='bash', results='hide'}
 # Bash Shell
 
-plink --vcf data/MMP.vcf --allow-extra-chr --no-fid --no-parents --no-sex --no-pheno --out data/MMP
+./plink --vcf data/MMP.vcf --allow-extra-chr --no-fid --no-parents --no-sex --no-pheno --out data/MMP
 ls data/MMP*
 ```
 
