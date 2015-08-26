@@ -1,3 +1,9 @@
+### Launch a new Amazon EC2 instance
+instructions: http://angus.readthedocs.org/en/2015/amazon/index.html
+
+### Change prompt
+PS1='$ '
+
 ### Install programs
 ```
 sudo apt-get update
