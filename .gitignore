@@ -1,1 +1,4 @@
-data/
+wg_data/
+*.html
+*.pdf
+.DS_Store

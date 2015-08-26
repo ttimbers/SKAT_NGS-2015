@@ -1,0 +1,86 @@
+##fileformat=VCFv4.1
+##fileDate=20130317
+##source=MMP_combined_calls
+##reference=ftp://ftp.wormbase.org:/pub/wormbase/releases/WS230/species/c_elegans/c_elegans.WS225.genomic.fa.gz
+##contig=<ID=I,length=15072423,assembly=WS225,species="Caenorhabditis elegans">
+##contig=<ID=II,length=15279345,assembly=WS225,species="Caenorhabditis elegans">
+##contig=<ID=III,length=13783700,assembly=WS225,species="Caenorhabditis elegans">
+##contig=<ID=IV,length=17493793,assembly=WS225,species="Caenorhabditis elegans">
+##contig=<ID=V,length=20924149,assembly=WS225,species="Caenorhabditis elegans">
+##contig=<ID=X,length=17718866,assembly=WS225,species="Caenorhabditis elegans">
+##contig=<ID=MtDNA,length=13794,assembly=WS225,species="Caenorhabditis elegans">
+##FILTER=<ID=fia,Description="fraction of covering alignments that are informative">
+##FILTER=<ID=fci,Description="fraction of informative reads that confirm indel">
+##FILTER=<ID=cmq,Description="RMS mapping quality of confirming alignments">
+##FILTER=<ID=man,Description="manually removed by MMP invesitgator">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SPAN,Number=1,Type=Integer,Description="Number of Unique Spanning Alignments Supporting Event">
+##INFO=<ID=NCOV,Number=1,Type=Float,Description="Mean Coverage in Region Normalized to 15x Strain Coverage">
+##INFO=<ID=NQDEV,Number=1,Type=Float,Description="Deviations from Background 15x Windowed/Normalized Coverage">
+##INFO=<ID=CODING,Number=1,Type=String,Description="Predicted Effect on Coding Sequence">
+##INFO=<ID=NCRNA,Number=1,Type=String,Description="Predicted Effect on Noncoding RNAs">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=RGS,Number=1,Type=Integer,Description="Region score">
+##INFO=<ID=MQDV,Number=1,Type=Float,Description="Mean region qdev value">
+##INFO=<ID=THRSHLD,Number=1,Type=Float,Description="Strain threshold qdev value">
+##INFO=<ID=MNQDV,Number=1,Type=Float,Description="Region minimum qdev value">
+##INFO=<ID=MXQDV,Number=1,Type=Float,Description="Region maximum qdev value">
+##INFO=<ID=INDEL,Number=1,Type=String,Description="Indel type,length,sequence">
+##INFO=<ID=CLASS,Number=1,Type=String,Description="Indel classification">
+##INFO=<ID=EIR,Number=3,Type=Integer,Description="Equivalent indel region length, start, and end">
+##INFO=<ID=ICV,Number=2,Type=Integer,Description="Informative read indel confirmation and coverage">
+##INFO=<ID=FIA,Number=1,Type=Float,Description="Fraction of covering reads that are informative">
+##INFO=<ID=FCI,Number=1,Type=Float,Description="Fraction of informative reads that confirm indel">
+##INFO=<ID=CMQ,Number=1,Type=Integer,Description="RMS mapping quality of confirming alignments">
+##INFO=<ID=GF,Number=1,Type=String,Description="Genomic feature">
+##INFO=<ID=SN,Number=1,Type=String,Description="Sequence name">
+##INFO=<ID=PN,Number=1,Type=String,Description="Public name">
+##INFO=<ID=RFC,Number=1,Type=String,Description="Reading frame change">
+##INFO=<ID=AAC,Number=1,Type=String,Description="Amino acid change">
+##INFO=<ID=DP20,Number=1,Type=Integer,Description="Depth of Phred >=20 aligning reads">
+##INFO=<ID=ACGTN,Number=1,Type=String,Description="Phred >=20 A,C,G,T,Other">
+##INFO=<ID=GRANT,Number=1,Type=String,Description="Grantham Score of AA Change">
+##INFO=<ID=GERP,Number=1,Type=String,Description="Gerp score of base">
+##INFO=<ID=PHYLOP,Number=1,Type=String,Description="PhyloP score of base">
+##INFO=<ID=PHASTCONS,Number=1,Type=String,Description="phastCons score of base">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	VC20761
+IV	285505	gk394659	C	T	194	PASS	DP20=9;CMQ=60;ACGTN=0,0,0,9,0;GF=coding_exon;SN=T21D12.15;PN=T21D12.15;AAC=F->F;GRANT=0;GERP=NA;PHYLOP=0.935;PHASTCONS=0.920;	GT	1/1
+IV	465349	gk394660	C	T	222	PASS	DP20=21;CMQ=60;ACGTN=0,0,0,21,0;GF=intron;SN=M04G7.3;PN=M04G7.3;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	743216	gk394661	C	T	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,0,15,0;GF=intron;SN=Y55F3C.3;PN=kvs-5;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	2592981	gk394662	C	T	172	PASS	DP20=8;CMQ=60;ACGTN=0,0,0,8,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	3347833	gk394663	T	G	196	PASS	DP20=10;CMQ=60;ACGTN=1,0,9,0,0;GF=intron_splicing;SN=F42A6.9;PN=elks-1;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=0.734;PHASTCONS=0.943;	GT	1/1
+IV	3877607	gk394664	C	T	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,0,15,0;GF=coding_exon;SN=F37C4.6;PN=F37C4.6;AAC=G->G;GRANT=0;GERP=NA;PHYLOP=-0.073;PHASTCONS=0.962;	GT	1/1
+IV	4259382	gk394665	C	T	219	PASS	DP20=11;CMQ=60;ACGTN=0,0,0,11,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	4626261	gk394666	C	T	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,0,15,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=1.003;PHASTCONS=0.688;	GT	1/1
+IV	4626275	gk394667	C	G	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,15,0,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=1.017;PHASTCONS=0.898;	GT	1/1
+IV	4825719	gk394668	C	T	222	PASS	DP20=18;CMQ=60;ACGTN=0,0,0,18,0;GF=coding_exon;SN=H06H21.9;PN=H06H21.9;AAC=S->N;GRANT=46;GERP=2.36;PHYLOP=1.548;PHASTCONS=0.966;	GT	1/1
+IV	5351696	gk394669	C	T	222	PASS	DP20=21;CMQ=60;ACGTN=0,0,0,21,0;GF=intron;SN=Y4C6B.7;PN=Y4C6B.7;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=0.000;PHASTCONS=0.870;	GT	1/1
+IV	5657229	gk946146	CT	C	.	PASS	INDEL=-1t;CLASS=induced;EIR=1,5657229,5657230;ICV=11,11;FIA=1.000;FCI=1.000;CMQ=93;GF=intron;SN=T19E7.2;PN=skn-1;RFC=no;AAC=not_calculated	GT	1/1
+IV	6822225	gk394670	C	T	222	PASS	DP20=12;CMQ=60;ACGTN=0,0,0,12,0;GF=intron;SN=C17H12.6;PN=C17H12.6;AAC=NA;GRANT=NA;GERP=-0.953;PHYLOP=-0.013;PHASTCONS=0.224;	GT	1/1
+IV	7102372	gk394671	C	T	222	PASS	DP20=22;CMQ=60;ACGTN=0,0,0,22,0;GF=intron;SN=ZC477.5;PN=ZC477.5;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=-0.286;PHASTCONS=0.350;	GT	1/1
+IV	7132500	gk394672	C	G	193	PASS	DP20=8;CMQ=60;ACGTN=0,0,8,0,0;GF=intron;SN=C34D4.12;PN=cyn-12;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	7328683	gk394673	C	T	222	PASS	DP20=13;CMQ=60;ACGTN=0,0,0,13,0;GF=intron;SN=Y40C5A.1;PN=Y40C5A.1;AAC=NA;GRANT=NA;GERP=-7.2;PHYLOP=-0.459;PHASTCONS=0.518;	GT	1/1
+IV	7335549	gk394674	C	T	222	PASS	DP20=16;CMQ=60;ACGTN=0,0,0,16,0;GF=intron_splicing;SN=Y40C5A.3;PN=Y40C5A.3;AAC=NA;GRANT=NA;GERP=4.67;PHYLOP=2.775;PHASTCONS=1.000;	GT	1/1
+IV	7470253	gk394675	C	T	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,0,15,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=3.17;PHYLOP=1.964;PHASTCONS=0.999;	GT	1/1
+IV	7533822	gk394676	A	T	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,0,13,2;GF=intron;SN=R05G6.12;PN=R05G6.12;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	7686881	gk394677	C	T	222	PASS	DP20=15;CMQ=60;ACGTN=0,0,0,15,0;GF=coding_exon;SN=F33D4.2;PN=itr-1;AAC=S->F;GRANT=155;GERP=5.44;PHYLOP=3.148;PHASTCONS=1.000;	GT	1/1
+IV	8030362	gk394678	C	T	217	PASS	DP20=10;CMQ=60;ACGTN=0,0,0,10,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=-4.65;PHYLOP=-0.409;PHASTCONS=0.870;	GT	1/1
+IV	10044681	gk394679	C	T	222	PASS	DP20=12;CMQ=60;ACGTN=0,0,0,12,0;GF=coding_exon;SN=T04B2.2;PN=frk-1;AAC=R->*;GRANT=-1;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	10670278	gk394680	C	T	222	PASS	DP20=18;CMQ=60;ACGTN=0,0,0,18,0;GF=coding_exon;SN=K08C7.3;PN=epi-1;AAC=P->L;GRANT=98;GERP=-10.9;PHYLOP=0.000;PHASTCONS=0.007;	GT	1/1
+IV	11312720	gk394681	C	T	171	PASS	DP20=10;CMQ=45;ACGTN=0,0,0,10,0;GF=coding_exon;SN=B0035.2;PN=dnj-2;AAC=G->E;GRANT=98;GERP=3.81;PHYLOP=2.360;PHASTCONS=1.000;	GT	1/1
+IV	11375148	gk394682	C	T	169	PASS	DP20=7;CMQ=60;ACGTN=0,0,0,7,0;GF=coding_exon;SN=H02I12.1;PN=cbd-1;AAC=P->S;GRANT=74;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	11812929	gk394683	C	T	218	PASS	DP20=9;CMQ=60;ACGTN=0,0,0,9,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=1.32;PHYLOP=0.387;PHASTCONS=0.176;	GT	1/1
+IV	13370595	gk394684	C	A	169	PASS	DP20=7;CMQ=60;ACGTN=7,0,0,0,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=1.41;PHYLOP=0.278;PHASTCONS=0.504;	GT	1/1
+IV	13471769	gk394685	C	T	222	PASS	DP20=20;CMQ=60;ACGTN=0,0,0,20,0;GF=coding_exon;SN=Y38H8A.4;PN=Y38H8A.4;AAC=G->E;GRANT=98;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	13695464	gk394686	C	T	222	PASS	DP20=18;CMQ=60;ACGTN=0,0,0,18,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	14063099	gk394687	C	T	222	PASS	DP20=13;CMQ=60;ACGTN=0,0,0,13,0;GF=coding_exon;SN=Y37A1B.2;PN=lst-4;AAC=G->R;GRANT=125;GERP=3;PHYLOP=1.959;PHASTCONS=0.982;	GT	1/1
+IV	16365168	gk394688	A	C	222	PASS	DP20=17;CMQ=60;ACGTN=0,17,0,0,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	16541216	gk394689	C	T	222	PASS	DP20=16;CMQ=60;ACGTN=0,0,0,16,0;GF=coding_exon;SN=Y51H4A.7;PN=Y51H4A.7;AAC=E->K;GRANT=56;GERP=3.43;PHYLOP=2.110;PHASTCONS=0.835;	GT	1/1
+IV	16720510	gk394690	C	T	222	PASS	DP20=14;CMQ=60;ACGTN=0,0,0,14,0;GF=intergenic;SN=IV;PN=IV;AAC=NA;GRANT=NA;GERP=NA;PHYLOP=NA;PHASTCONS=NA;	GT	1/1
+IV	17321838	gk394691	C	T	222	PASS	DP20=14;CMQ=60;ACGTN=0,0,0,14,0;GF=coding_exon;SN=C49C3.4;PN=C49C3.4;AAC=I->I;GRANT=0;GERP=2.13;PHYLOP=0.545;PHASTCONS=0.983;	GT	1/1
+IV	17446836	gk394692	C	T	222	PASS	DP20=14;CMQ=60;ACGTN=0,0,0,14,0;GF=intron;SN=F11E6.8;PN=F11E6.8;AAC=NA;GRANT=NA;GERP=-2.48;PHYLOP=-0.177;PHASTCONS=0.569;	GT	1/1
