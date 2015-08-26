@@ -50,14 +50,14 @@ In the `data` directory we have a collection of 480 `.vcf` files, each of which 
 isogenic nematode, *Caenorhabditis elegans*, strains from the [Million Mutation Project](http://genome.sfu.ca/mmp/about.html) (Thompson *et. al., Genome Research*, 2013) called 
 against the VC2010 reference strain (a derivative of N2). Given that these are isogenic strains, we will treat each strain as an 
 individual for this analysis. 
-```{r engine='bash'}
+```
 # Bash Shell
 ls data/*.vcf | head -5
 ```
 
 Next, we use the VCFtools program `vcf-merge` to create a single merged `.vcf` file containing all the variants and all 
 the individuals.
-```{r engine='bash', results='hide'}
+```
 # Bash Shell
 ## CAUTION: LONG-RUN TIME PROCESS
 
@@ -72,7 +72,7 @@ ls data/MMP_vcf-merge.vcf.gz
 ```
 
 Then we uncompress `MMP.vcf.gz` so we can use it to create a snp set ID (`SSID`) file, as well as binary `plink` files.
-```{r engine='bash'}
+```
 # Bash Shell
 
 gunzip data/MMP_vcf-merge.vcf.gz
@@ -84,7 +84,7 @@ that if there was no variant info for an individual when it merged the file that
 the case of this data this is not true. For this dataset, each individual .vcf files simply did not contain all variants for this whole dataset
 because each file would be ~ 860,000 lines long and filled with mostly "0/0". But we need those "0/0" for our analysis and so we need to replace 
 the "." with "0/0". We can use the gsub function in awk to do this. 
-```{r engine='bash'}
+```
 # Bash Shell
 
 # replace  "." with "0/0""
@@ -104,7 +104,7 @@ increase power.
 First we extract all the lines from the `.vcf` file with gene names using a series of `grep` commands. Note - these 
 commands depend on how you defined your gene/sequence names in the`INFO` column. In the case of the `.vcf` files
 we are using here, gene/sequence names are found either after `SN=` or `CODING=`.
-```{r engine='bash'}
+```
 # Bash Shell
 
 grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | grep -E -v 'GRANT=0|GRANT=NA' | cut -f 1-8 > data/gene_variants.txt
@@ -113,7 +113,7 @@ head -5 data/gene_variants.txt
 
 Next we need to extract the gene and the sequence names from `data/gene_variants.txt` and save them in a file called `MMP.SSID`.
 We will do this in R for simplicity, but it could be done faster with another language (*e.g.,* Perl)
-```{r}
+```
 # R
 
 ## load data/gene_variants.txt into R
@@ -145,7 +145,7 @@ write.table(x = SSID, file = "data/MMP.SSID", row.names = FALSE, col.names = FAL
 `plink` (Purcell *et al., American Journal of Human Genetics*, 2007) is one of the most widely used programs to perform traditional GWAS (*e.g.,* using SNP array data) 
 and thus most newly developed tools accept `plink` files as input. In addition to association analysis tools, `plink` now
 also contains tools to convert `.vcf` files to `plink` files.
-```{r engine='bash', results='hide'}
+```
 # Bash Shell
 
 ./plink --vcf data/MMP.vcf --allow-extra-chr --no-fid --no-parents --no-sex --no-pheno --out data/MMP
@@ -158,7 +158,7 @@ The `.fam` file does not yet contain the phenotype/disease outcome data. We need
 column 6 from the `.fam` file and joining it by strain/individual with the file containing our phenotype/disease outcome data.
 Because these files are smaller (2-6 column and hundreds of to tens of thousands of rows) we can load these files into memory and
 will take advantage of the powerful `dplyr` package in `R` to do this.
-```{r}
+```
 # R
 
 # load dplyr library (we will use this to join the files)
@@ -183,7 +183,7 @@ head(fam_w_phenos)
 write.table(x = fam_w_phenos, file = "data/MMP.fam", row.names = FALSE, col.names = FALSE, quote = FALSE, append = FALSE)
 ```
 
-```{r engine='bash'}
+```
 # Bash Shell
 
 head -5 data/MMP.fam
@@ -193,7 +193,7 @@ head -5 data/MMP.fam
 
 Now that we have our `SSID` file and our binary `plink` files we can do the association analysis. We will work in R
 to do this and use the SKAT package (Wu *et al., American Journal of Human Genetics*, 2011).
-```{r}
+```
 # R
 ## CAUTION: LONG-RUN TIME PROCESS
 
@@ -230,7 +230,7 @@ head(All_SKAT_Data$results)
 
 The results are sorted via SetID, and not p-value. Thus, to find which genes are most highly associated with our
 phenotype/disease outcome we must sort the results by p-value.
-```{r}
+```
 # R
 
 # sort SKAT results by p-value
@@ -245,7 +245,7 @@ write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-pvals.results", row
 We have just performed association tests on > 1000 genes... We need to correct for multiple testing. There
 are many ways to do this, including Bonferroni correction, False discovery rate and resampling. We will choose
 a "medium" stringency multiple correction adjustment, the false discovery rate.
-```{r}
+```
 # R
 
 # load fdrtool library
@@ -266,7 +266,7 @@ write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-qvals.results", row
 We find that if we choose a 30% false-discovery rate cut-off that we find that a lot of genes are significantly associated with
 the phenotype. This doesn't make much sense? This is due to a skewed p-value distrubution from these samples which arises from 
 the distribution of minor allele counts in the Million Mutation project strains which exponentially decreases from 1 to N.
-```{r}
+```
 # R
 
 # load plyr library so we can count how many variants are in each snp set
@@ -294,7 +294,7 @@ minor allele count for a SNP set must be.
 From the histogram of the minor allele count per gene for this dataset, a minimum minor allele count of 7 
 seems to be reasonable. Thus, we will reduce our SNP set ID (`.SSID`) file to only those genes which
 meet that criteria.
-```{r}
+```
 # R
 
 # load .SSID file and give meaningful column names
@@ -322,7 +322,7 @@ write.table(x = reduced_SSID, file = "data/MMP-reduced.SSID", row.names = FALSE,
 ```
 
 Now can run SKAT with this reduced SNP set ID (`.SSID`) file:
-```{r}
+```
 # R
 ## CAUTION: LONG-RUN TIME PROCESS
 
