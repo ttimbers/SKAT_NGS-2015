@@ -223,10 +223,11 @@ missing rates markers (`N.Marker.Test`).
 # R
 
 # Checkout SKAT results
-# head(All_SKAT_Data$results)
+# All_SKAT_Data$results[1:20,]
 
 # open saved file
 All_SKAT_Data <- read.table(file = "data/SKAT_all-pvals.results", header =TRUE)
+All_SKAT_Data[1:20,]
 ```
 
 The results are sorted via SetID, and not p-value. Thus, to find which genes are most highly associated with our
@@ -342,6 +343,7 @@ SSD.info_reduced <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # open saved file
 All_SKAT_Data_reduced <- read.table(file = "data/SKAT_all_reduced.results", header =TRUE)
+All_SKAT_Data_reduced[1:20,]
 
 # sort SKAT results by p-value
 head(All_SKAT_Data_reduced[order(All_SKAT_Data_reduced$P.value),])
