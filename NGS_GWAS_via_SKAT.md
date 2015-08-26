@@ -213,9 +213,8 @@ SSD.info <- Open_SSD('data/MMP.SSD', 'MMP.info')
 set.seed(100)
 Null_Model <- SKAT_Null_Model(fam_file$V6 ~ 1, out_type="D")
 
-# perform SKAT on all sets of variants
-#All_SKAT_Data  <- SKAT.SSD.All(SSD.info, Null_Model) 
-All_SKAT_Data  <- SKAT.SSD.All(SSD.INFO = SSD.info, obj = Null_Model) 
+# perform SKAT on all sets of variants (we wont run this because it takes too long)
+#All_SKAT_Data  <- SKAT.SSD.All(SSD.INFO = SSD.info, obj = Null_Model) 
 ```
 
 SKAT.SSD.All returns a dataframe that contains `SetID`, p-values (`P.value`), the number of markers in the SNP sets 
@@ -225,7 +224,10 @@ missing rates markers (`N.Marker.Test`).
 # R
 
 # Checkout SKAT results
-head(All_SKAT_Data$results)
+# head(All_SKAT_Data$results)
+
+# open saved file
+All_SKAT_Data <- read.table(file = "data/SKAT_all-pvals.results", header =TRUE)
 ```
 
 The results are sorted via SetID, and not p-value. Thus, to find which genes are most highly associated with our
@@ -234,10 +236,10 @@ phenotype/disease outcome we must sort the results by p-value.
 # R
 
 # sort SKAT results by p-value
-head(All_SKAT_Data$results[order(All_SKAT_Data$results$P.value),])
+head(All_SKAT_Data[order(All_SKAT_Data$P.value),])
 
-#save SKAT results
-write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-pvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+# save SKAT results
+# write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-pvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 ### Apply mutliple testing correction
@@ -252,15 +254,15 @@ a "medium" stringency multiple correction adjustment, the false discovery rate.
 library(fdrtool)
 
 # calculate q-values
-qvals <- fdrtool(All_SKAT_Data$results$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
-All_SKAT_Data$results$Q.value <- qvals$qval
+qvals <- fdrtool(All_SKAT_Data$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
+All_SKAT_Data$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-All_SKAT_Data$results <-All_SKAT_Data$results[order(All_SKAT_Data$results$P.value),]
-All_SKAT_Data$results[1:20,]
+All_SKAT_Data <-All_SKAT_Data[order(All_SKAT_Data$P.value),]
+All_SKAT_Data[1:20,]
 
 #save SKAT results
-write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-qvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+# write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-qvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 We find that if we choose a 30% false-discovery rate cut-off that we find that a lot of genes are significantly associated with
@@ -336,22 +338,25 @@ Generate_SSD_SetID('data/MMP.bed', 'data/MMP.bim', 'data/MMP.fam', 'data/MMP-red
 SSD.info_reduced <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # null model doesn't take in info from .SSID, so we don't need to run that again
-# perform SKAT on all sets of variants
-All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.INFO = SSD.info_reduced, obj = Null_Model)
+# perform SKAT on all sets of variants (we wont run this because it takes too long)
+# All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.INFO = SSD.info_reduced, obj = Null_Model) 
+
+# open saved file
+All_SKAT_Data_reduced <- read.table(file = "data/SKAT_all_reduced.results", header =TRUE)
 
 # sort SKAT results by p-value
-head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),])
+head(All_SKAT_Data_reduced[order(All_SKAT_Data_reduced$P.value),])
 
 # calculate q-values
-qvals <- fdrtool(All_SKAT_Data_reduced$results$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
-All_SKAT_Data_reduced$results$Q.value <- qvals$qval
+qvals <- fdrtool(All_SKAT_Data_reduced$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
+All_SKAT_Data_reduced$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-All_SKAT_Data_reduced$results <- All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),]
-All_SKAT_Data_reduced$results[1:20,]
+All_SKAT_Data_reduced$ <- All_SKAT_Data_reduced[order(All_SKAT_Data_reduced$P.value),]
+All_SKAT_Data_reduced[1:20,]
 
 #save SKAT results
-write.table(x = All_SKAT_Data_reduced$results, file = "data/SKAT_all_reduced.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+# write.table(x = All_SKAT_Data_reduced$results, file = "data/SKAT_all_reduced.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 Now we can see that only a handful of genes are associated with the phenotype - a much more reasonable number. So
