@@ -34,7 +34,7 @@ variants which fall within a chosen region size).
 6. Append the phenotype/disease outcome to the `plink` `.fam` file
 7. (optional) Create co-variate file
 8. Apply association test (*e.g.,* `SKAT`)
-9. Apply mutliple testing correction to determine which genes/regions are significantly associated with the
+9. Apply multiple testing correction to determine which genes/regions are significantly associated with the
 phenotype/disease outcome
 
 ## Let's do it!
@@ -243,7 +243,7 @@ head(All_SKAT_Data[order(All_SKAT_Data$P.value),])
 # write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-pvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
-### Apply mutliple testing correction
+### Apply multiple testing correction
 
 We have just performed association tests on > 1000 genes... We need to correct for multiple testing. There
 are many ways to do this, including Bonferroni correction, False discovery rate and resampling. We will choose
