@@ -66,7 +66,8 @@ for file in data/*.vcf; do bgzip -c $file > $file.gz; tabix -p vcf $file.gz; don
 ls data/*.vcf.gz | head -5
 
 # merge them together (note - if you run this twice you will get an error message because it will try to merge MMP_vcf-merge.vcf.gz)
-vcf-merge data/*.vcf.gz | bgzip -c > data/MMP_vcf-merge.vcf.gz
+vcf-merge data/*.vcf.gz | bgzip -c > merged
+mv merged data/MMP_vcf-merge.vcf.gz
 ls data/MMP_vcf-merge.vcf.gz
 ```
 
