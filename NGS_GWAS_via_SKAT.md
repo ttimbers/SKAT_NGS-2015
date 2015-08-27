@@ -318,7 +318,7 @@ colnames(SSID) <- c("gene", "variant")
 head(SSID)
 
 # make a list of the variants to keep (i.e. plyr::count the number of occurrences of each gene)
-SSID_count <- count(SSID[,1])
+SSID_count <- count(SSID[1])
 head(SSID_count)
   
 # make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 6 variants)
@@ -355,7 +355,7 @@ SSD.info_reduced <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
 # All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.INFO = SSD.info_reduced, obj = Null_Model) 
 
 # open saved file
-All_SKAT_Data_reduced <- read.table(file = "data/SKAT_all_reduced.results", header =TRUE)
+All_SKAT_Data_reduced <- read.table(file = "data/SKAT_all_reduced-pvals.results", header =TRUE)
 All_SKAT_Data_reduced[1:20,]
 
 # sort SKAT results by p-value
@@ -366,7 +366,7 @@ qvals <- fdrtool(All_SKAT_Data_reduced$P.value, statistic = "pvalue", cutoff.met
 All_SKAT_Data_reduced$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-All_SKAT_Data_reduced$ <- All_SKAT_Data_reduced[order(All_SKAT_Data_reduced$P.value),]
+All_SKAT_Data_reduced <- All_SKAT_Data_reduced[order(All_SKAT_Data_reduced$P.value),]
 All_SKAT_Data_reduced[1:20,]
 
 #save SKAT results
