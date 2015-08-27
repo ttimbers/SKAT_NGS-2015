@@ -9,11 +9,15 @@ PS1='$ '
 echo 'deb http://cran.mtu.edu/bin/linux/ubuntu trusty/' | sudo tee -a /etc/apt/sources.list.d/r.list
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo apt-get update
-sudo apt-get install -y r-base zlib1g-dev vcftools putty-tools plink
-wget https://www.cog-genomics.org/static/bin/plink150805/plink_linux_x86_64.zip
-sudo apt-get install -y gcc gcc-c++ libstdc++ gcc-gfortran glibc glibc-devel make blas-devel lapack lapack-devel atlas-devel libatlas-dev libatlas-base-dev
-unzip plink_linux_x86_64.zip
+sudo apt-get install -y r-base zlib1g-dev vcftools putty-tools plink \
+     gcc gcc-c++ libstdc++ gcc-gfortran glibc glibc-devel make blas-devel lapack lapack-devel atlas-devel \
+     libatlas-dev libatlas-base-dev
+```
 
+and then install plink:
+```
+wget https://www.cog-genomics.org/static/bin/plink150805/plink_linux_x86_64.zip
+unzip plink_linux_x86_64.zip
 ```
 
 ```
