@@ -12,13 +12,14 @@ and individuals without the phenotype or disease outcome (controls). Individuals
 if one variant appears significantly more frequently in the pool of individuals with the disease then the variant is said to be 
 "associated" with the disease. 
 
-## New considerations when performing GWAS on sequecing data
+## New considerations when performing GWAS on sequencing data
 GWAS was developed for data from SNP microarrays and has begun to be subsequently adapted for next-generation sequencing data. Thus there
 are several considerations when doing GWAS with sequencing data, including:
 * how to deal with rare variants (these didn't exist in SNP array experiments)?
 * focus only on the exome? or look at whole-genome?
+* how to deal with synonomous mutations?
 
-## Advantages when performing GWAS on sequecing data
+## Advantages when performing GWAS on sequencing data
 * potentially increased power due to rare variants potentially being more sever than common variants 
 * sequencing gives a complete picture of genetic variation (*e.g.,* SNPs, Copy Number Variants (CNVs) and insertions-deletions)
 * can predict severity of variants from sequencing data and use this to weight analysis
@@ -46,9 +47,9 @@ with 2 columns (the first being the individual ID and the second being the pheno
 ### Create a merged `.vcf` file containing all the variants and all the individuals
 
 In the `data` directory we have a collection of 480 `.vcf` files, each of which represent the whole-genome sequences of individual 
-isogenic nematode, *Caenorhabditis elegans*, strains from the Million Mutation Project (Thompson *et. al., Genome Research*, 2013) called 
+isogenic nematode, *Caenorhabditis elegans*, strains from the [Million Mutation Project](http://genome.sfu.ca/mmp/about.html) (Thompson *et. al., Genome Research*, 2013) called 
 against the VC2010 reference strain (a derivative of N2). Given that these are isogenic strains, we will treat each strain as an 
-individual for this analysis.
+individual for this analysis. 
 ```{r engine='bash'}
 # Bash Shell
 ls data/*.vcf | head -5
@@ -56,22 +57,26 @@ ls data/*.vcf | head -5
 
 Next, we use the VCFtools program `vcf-merge` to create a single merged `.vcf` file containing all the variants and all 
 the individuals.
-```{r engine='bash'}
+```{r engine='bash', results='hide'}
 # Bash Shell
+## CAUTION: LONG-RUN TIME PROCESS
+
 # pre-process .vcf files so they are compatible with vcf-merge
-for file in *.vcf; do bgzip -c $file > $file.gz; tabix -p vcf $file.gz; done
+for file in data/*.vcf; do bgzip -c $file > $file.gz; tabix -p vcf $file.gz; done
 ls data/*.vcf.gz | head -5
 
 # merge them together (note - if you run this twice you will get an error message because it will try to merge MMP_vcf-merge.vcf.gz)
-vcf-merge data/*.vcf.gz | bgzip -c > MMP_vcf-merge.vcf.gz 
-ls MMP_vcf-merge.vcf.gz
+ulimit -n 8000  # this is because vcf-merge will open many files simultaneously
+vcf-merge data/*.vcf.gz | bgzip -c > data/MMP_vcf-merge.vcf.gz
+ls data/MMP_vcf-merge.vcf.gz
 ```
 
 Then we uncompress `MMP.vcf.gz` so we can use it to create a snp set ID (`SSID`) file, as well as binary `plink` files.
 ```{r engine='bash'}
 # Bash Shell
+
 gunzip data/MMP_vcf-merge.vcf.gz
-grep -v -E '##' MMP_vcf-merge.vcf | cut -f 10-15 | head -5
+grep -v -E '##' data/MMP_vcf-merge.vcf | cut -f 10-15 | head -5
 ```
 
 When we merged the files, we see that for each individual we either have "1/1" or "." for a genotype. vcf-merge assumed
@@ -80,26 +85,29 @@ the case of this data this is not true. For this dataset, each individual .vcf f
 because each file would be ~ 860,000 lines long and filled with mostly "0/0". But we need those "0/0" for our analysis and so we need to replace 
 the "." with "0/0". We can use the gsub function in awk to do this. 
 ```{r engine='bash'}
+# Bash Shell
+
 # replace  "." with "0/0""
-awk '{gsub("\t[.]","\t0/0",$0); print;}' MMP_vcf-merge.vcf > MMP.vcf
-grep -v -E '##' MMP.vcf | cut -f 10-15 | head -5
+awk '{gsub("\t[.]","\t0/0",$0); print;}' data/MMP_vcf-merge.vcf > data/MMP.vcf
+grep -v -E '##' data/MMP.vcf | cut -f 10-15 | head -5
 ```
 
 ### Create a SNP set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene)
 
 For this analysis, we will define our SNP/variant sets by genes, thus we will omit all other DNA outside of exons and 
-introns from our analysis. To do this we need to create a snp set ID (`.SSID`) file which indicates which variants 
-belong to which set (*e.g.,* gene). `SSID` files contain 2 columns, the first being the gene name and the second being
-the variant name. Note - you can define these SNP sets however you want for your own analysis. For example, you could
-define them by biochemical pathways as opposed to genes to potentially increase power.
-
+introns from our analysis. We also want to omit silent mutations in coding regions To do this we need to create a snp 
+set ID (`.SSID`) file which indicates which variants belong to which set (*e.g.,* gene). `SSID` files contain 2 columns, 
+the first being the gene name and the second being the variant name. Note - you can define these SNP sets however you 
+want for your own analysis. For example, you could define them by biochemical pathways as opposed to genes to potentially 
+increase power.
 
 First we extract all the lines from the `.vcf` file with gene names using a series of `grep` commands. Note - these 
 commands depend on how you defined your gene/sequence names in the`INFO` column. In the case of the `.vcf` files
 we are using here, gene/sequence names are found either after `SN=` or `CODING=`.
 ```{r engine='bash'}
 # Bash Shell
-grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | cut -f 1-8 > data/gene_variants.txt
+
+grep -E -v '#' data/MMP.vcf | grep -E 'SN=[A-Z0-9.]{4,}|CODING=' | grep -E -v 'SN=I;' | grep -E -v 'GRANT=0|GRANT=NA' | cut -f 1-8 > data/gene_variants.txt
 head -5 data/gene_variants.txt
 ```
 
@@ -137,9 +145,10 @@ write.table(x = SSID, file = "data/MMP.SSID", row.names = FALSE, col.names = FAL
 `plink` (Purcell *et al., American Journal of Human Genetics*, 2007) is one of the most widely used programs to perform traditional GWAS (*e.g.,* using SNP array data) 
 and thus most newly developed tools accept `plink` files as input. In addition to association analysis tools, `plink` now
 also contains tools to convert `.vcf` files to `plink` files.
-```{r engine='bash'}
+```{r engine='bash', results='hide'}
 # Bash Shell
-plink --vcf data/MMP.vcf --allow-extra-chr --no-fid --no-parents --no-sex --no-pheno --out data/MMP
+
+./plink --vcf data/MMP.vcf --allow-extra-chr --no-fid --no-parents --no-sex --no-pheno --out data/MMP
 ls data/MMP*
 ```
 
@@ -151,6 +160,7 @@ Because these files are smaller (2-6 column and hundreds of to tens of thousands
 will take advantage of the powerful `dplyr` package in `R` to do this.
 ```{r}
 # R
+
 # load dplyr library (we will use this to join the files)
 library(dplyr)
 
@@ -175,6 +185,7 @@ write.table(x = fam_w_phenos, file = "data/MMP.fam", row.names = FALSE, col.name
 
 ```{r engine='bash'}
 # Bash Shell
+
 head -5 data/MMP.fam
 ```
 
@@ -184,6 +195,8 @@ Now that we have our `SSID` file and our binary `plink` files we can do the asso
 to do this and use the SKAT package (Wu *et al., American Journal of Human Genetics*, 2011).
 ```{r}
 # R
+## CAUTION: LONG-RUN TIME PROCESS
+
 # load SKAT library (to do association analysis)
 library(SKAT)
 
@@ -201,7 +214,8 @@ set.seed(100)
 Null_Model <- SKAT_Null_Model(fam_file$V6 ~ 1, out_type="D")
 
 # perform SKAT on all sets of variants
-All_SKAT_Data  <- SKAT.SSD.All(SSD.info, Null_Model) 
+#All_SKAT_Data  <- SKAT.SSD.All(SSD.info, Null_Model) 
+All_SKAT_Data  <- SKAT.SSD.All(SSD.INFO = SSD.info, obj = Null_Model) 
 ```
 
 SKAT.SSD.All returns a dataframe that contains `SetID`, p-values (`P.value`), the number of markers in the SNP sets 
@@ -209,6 +223,7 @@ SKAT.SSD.All returns a dataframe that contains `SetID`, p-values (`P.value`), th
 missing rates markers (`N.Marker.Test`).
 ```{r}
 # R
+
 # Checkout SKAT results
 head(All_SKAT_Data$results)
 ```
@@ -217,8 +232,12 @@ The results are sorted via SetID, and not p-value. Thus, to find which genes are
 phenotype/disease outcome we must sort the results by p-value.
 ```{r}
 # R
+
 # sort SKAT results by p-value
 head(All_SKAT_Data$results[order(All_SKAT_Data$results$P.value),])
+
+#save SKAT results
+write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-pvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 ### Apply mutliple testing correction
@@ -228,18 +247,20 @@ are many ways to do this, including Bonferroni correction, False discovery rate 
 a "medium" stringency multiple correction adjustment, the false discovery rate.
 ```{r}
 # R
+
 # load fdrtool library
 library(fdrtool)
 
 # calculate q-values
-qvals <- fdrtool(All_SKAT_Data$results$P.value, statistic = "pvalue", cutoff.method="fndr")
+qvals <- fdrtool(All_SKAT_Data$results$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
 All_SKAT_Data$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-head(All_SKAT_Data$results[order(All_SKAT_Data$results$Q.value),])
+All_SKAT_Data$results <-All_SKAT_Data$results[order(All_SKAT_Data$results$P.value),]
+All_SKAT_Data$results[1:20,]
 
 #save SKAT results
-write.table(file = All_SKAT_Data$results, row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+write.table(x = All_SKAT_Data$results, file = "data/SKAT_all-qvals.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 We find that if we choose a 30% false-discovery rate cut-off that we find that a lot of genes are significantly associated with
@@ -247,6 +268,7 @@ the phenotype. This doesn't make much sense? This is due to a skewed p-value dis
 the distribution of minor allele counts in the Million Mutation project strains which exponentially decreases from 1 to N.
 ```{r}
 # R
+
 # load plyr library so we can count how many variants are in each snp set
 library(plyr)
 
@@ -257,8 +279,7 @@ SSID <- read.table(file = "data/MMP.SSID", stringsAsFactors = FALSE)
 MACs <- count(SSID[,1])
 
 # plot this as a histogram
-MAC_hist <- hist(x <- MACs[,2])
-plot(MAC_hist$counts, xlab = "Minor Allele Count", ylab = "Number of Genes")
+MAC_hist <- hist(x <- (MACs[MACs$freq < 50,2]), breaks = 50, xlab = "Minor Allele Count", ylab = "Number of Genes", main = "Allele distribution")
 ```
 
 Thus, to use false-discovery rate we need to decide on a minimum minor allele count for SNP sets we want 
@@ -275,6 +296,7 @@ seems to be reasonable. Thus, we will reduce our SNP set ID (`.SSID`) file to on
 meet that criteria.
 ```{r}
 # R
+
 # load .SSID file and give meaningful column names
 SSID <- read.table(file = "data/MMP.SSID", header=FALSE)
 colnames(SSID) <- c("gene", "variant")
@@ -284,8 +306,8 @@ head(SSID)
 SSID_count <- count(SSID[,1])
 head(SSID_count)
   
-# make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 7 variants)
-genes_to_include <- data.frame(SSID_count[SSID_count$freq >= 7, 1])
+# make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 6 variants)
+genes_to_include <- data.frame(SSID_count[SSID_count$freq >= 5, 1])
 
 # give the data frame meaningful column names  
 colnames(genes_to_include) <- ("gene")
@@ -302,6 +324,8 @@ write.table(x = reduced_SSID, file = "data/MMP-reduced.SSID", row.names = FALSE,
 Now can run SKAT with this reduced SNP set ID (`.SSID`) file:
 ```{r}
 # R
+## CAUTION: LONG-RUN TIME PROCESS
+
 # load SKAT library (to do association analysis)
 library(SKAT)
 
@@ -309,24 +333,25 @@ library(SKAT)
 Generate_SSD_SetID('data/MMP.bed', 'data/MMP.bim', 'data/MMP.fam', 'data/MMP-reduced.SSID', 'data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # open .SSD and .info files we just created
-SSD.info <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
+SSD.info_reduced <- Open_SSD('data/MMP-reduced.SSD', 'MMP-reduced.info')
 
 # null model doesn't take in info from .SSID, so we don't need to run that again
 # perform SKAT on all sets of variants
-All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.info, Null_Model_reduced) 
+All_SKAT_Data_reduced  <- SKAT.SSD.All(SSD.INFO = SSD.info_reduced, obj = Null_Model)
 
 # sort SKAT results by p-value
 head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),])
 
 # calculate q-values
-qvals <- fdrtool(All_SKAT_Data_reduced$results$P.value, statistic = "pvalue", cutoff.method="fndr")
+qvals <- fdrtool(All_SKAT_Data_reduced$results$P.value, statistic = "pvalue", cutoff.method="fndr", plot = FALSE)
 All_SKAT_Data_reduced$results$Q.value <- qvals$qval
 
 # sort SKAT results by q-value
-head(All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$Q.value),])
+All_SKAT_Data_reduced$results <- All_SKAT_Data_reduced$results[order(All_SKAT_Data_reduced$results$P.value),]
+All_SKAT_Data_reduced$results[1:20,]
 
-#save results
-write.table(file = All_SKAT_Data_reduced$results, row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
+#save SKAT results
+write.table(x = All_SKAT_Data_reduced$results, file = "data/SKAT_all_reduced.results", row.names = FALSE, col.names = TRUE, quote = FALSE, append = FALSE)
 ```
 
 Now we can see that only a handful of genes are associated with the phenotype - a much more reasonable number. So
@@ -335,7 +360,7 @@ analysis on another sample of the population and if any genes show up as signfic
 then we would have a fair anount confidence that their disruption may cause the phenotpye/disease outcome.
 
 
-In genetically manipuable model organisms you could instead experimentally confirm that mutations in these 
+In genetically manipuable organisms you could instead experimentally confirm that mutations in these 
 genes are causative for the phenotpye/disease outcome via Crispr/Casp, genetic rescue, RNAi 
 and/or mapping experiments.
 
