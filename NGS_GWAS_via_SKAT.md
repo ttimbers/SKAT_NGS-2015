@@ -318,7 +318,7 @@ colnames(SSID) <- c("gene", "variant")
 head(SSID)
 
 # make a list of the variants to keep (i.e. plyr::count the number of occurrences of each gene)
-SSID_count <- count(SSID[,1])
+SSID_count <- count(SSID[1])
 head(SSID_count)
   
 # make SSID file with only those variants (i.e. reduce the SSID list to only those with >= 6 variants)
